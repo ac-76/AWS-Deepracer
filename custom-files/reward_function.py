@@ -16,12 +16,13 @@ def reward_function(params):
     distance_from_center = params['distance_from_center']
     left_of_center = params['is_left_of_center']
     track_width = params['track_width']
-    abs_steering = params['steering_angle']
+    steering_angle = params['steering_angle']
     speed = params['speed']
     progress = params['progress']
     steps = params['steps']
     is_reversed = params['is_reversed'] #True for cw and false for ccw
     track_length = params['track_length']
+    abs_steering = abs(steering_angle)
 
 
     # Calculate the direction of the center line based on the closest waypoints
@@ -36,12 +37,11 @@ def reward_function(params):
     # Calculate the difference between the track direction and the heading direction of the car
     direction_diff = abs(track_direction_degrees - heading)
 
-    ABS_STEERING_THRESHOLD = 30.0
     SPEED_THRESHOLD_STRAIGHT = 3.5
+    SPEED_THRESHOLD_MEDIUM_TURN_MIN = 2.0
+    SPEED_THRESHOLD_MEDIUM_TURN_MAX = 3.0
     SPEED_THRESHOLD_WIDE_TURN_MIN = 1.5
     SPEED_THRESHOLD_WIDE_TURN_MAX = 2.0
-    SPEED_THRESHOLD_MIN=2.0
-    SPEED_THRESHOLD_MAX=4.0
 
     NUM_OF_ACTIONS = 6
 
@@ -56,6 +56,13 @@ def reward_function(params):
     if abs_steering < ABS_STRAIGHT_ANGLE:
         if speed > SPEED_THRESHOLD_STRAIGHT:
             reward += 2.0
+    
+    if abs_steering > ABS_STRAIGHT_ANGLE and abs_steering < ABS_WIDE_TURN_ANGLE:
+        if speed < SPEED_THRESHOLD_MEDIUM_TURN_MIN:
+            reward += 0.5
+        elif speed < SPEED_THRESHOLD_MEDIUM_TURN_MAX:
+            reward += 1.0
+    
     #on turns, go a minimum speed
     if abs_steering > ABS_WIDE_TURN_ANGLE:
         if speed < SPEED_THRESHOLD_WIDE_TURN_MIN:
@@ -71,7 +78,7 @@ def reward_function(params):
 
     # steering reward 
     # calculate reward for car steering in the same direction as the track heading
-    steering_heading = abs(abs_steering - direction_diff)/180.0
+    steering_heading = abs(steering_angle - direction_diff)/180.0
     STEERING_PENALTY = 1 - steering_heading
     reward += 10.0*STEERING_PENALTY
 
