@@ -1,8 +1,8 @@
 {
   "action_space": {
       "steering_angle": {
-          "high": 21,
-          "low": -21
+          "high": 27,
+          "low": -27
       },
       "speed": {
           "high": 4,
